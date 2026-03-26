@@ -180,3 +180,85 @@ def decode_aud_data(in_file):
                     return decoded_data[:-5]
     return "No Hidden Data Found"
 
+
+# Advanced Steganography Features (Hybrid Encryption + Scatter)
+import hashlib
+import random
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import base64
+from skimage.metrics import structural_similarity as ssim_func
+
+def encrypt_text(key_str, plaintext):
+    key = hashlib.sha256(key_str.encode()).digest()
+    cipher = AES.new(key, AES.MODE_CBC)
+    ct_bytes = cipher.encrypt(pad(plaintext.encode(), AES.block_size))
+    iv = base64.b64encode(cipher.iv).decode('utf-8')
+    ct = base64.b64encode(ct_bytes).decode('utf-8')
+    return iv + ":" + ct
+
+def decrypt_text(key_str, ciphertext_b64):
+    try:
+        iv_b64, ct_b64 = ciphertext_b64.split(':')
+        iv = base64.b64decode(iv_b64)
+        ct = base64.b64decode(ct_b64)
+        key = hashlib.sha256(key_str.encode()).digest()
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        pt = unpad(cipher.decrypt(ct), AES.block_size).decode('utf-8')
+        return pt
+    except Exception as e:
+        return "Decryption failed: Incorrect password or corrupted data."
+
+def calculate_metrics(original_img, stego_img):
+    psnr = cv2.PSNR(original_img, stego_img)
+    ssim_val = ssim_func(original_img, stego_img, channel_axis=2)
+    return psnr, ssim_val
+
+def encode_img_advanced(img, data, password, nameoffile):
+    if len(data) == 0:
+        raise ValueError('Data is empty')
+        
+    encrypted_data = encrypt_text(password, data)
+    encrypted_data += '*^*^*'
+    binary_data = msgtobinary(encrypted_data)
+    length_data = len(binary_data)
+    
+    flat_img = img.flatten()
+    if length_data > len(flat_img):
+        raise ValueError("Insufficient bytes Error, Need Bigger Image")
+        
+    random.seed(password)
+    indices = list(range(len(flat_img)))
+    random.shuffle(indices)
+    
+    for i in range(length_data):
+        idx = indices[i]
+        pixel_val = flat_img[idx]
+        pixel_bin = format(pixel_val, "08b")
+        new_pixel_val = int(pixel_bin[:-1] + binary_data[i], 2)
+        flat_img[idx] = new_pixel_val
+        
+    stego_img = flat_img.reshape(img.shape)
+    cv2.imwrite(nameoffile, stego_img)
+    return stego_img
+
+def decode_img_advanced(img, password):
+    flat_img = img.flatten()
+    random.seed(password)
+    indices = list(range(len(flat_img)))
+    random.shuffle(indices)
+    
+    data_binary = ""
+    for i in range(len(indices)):
+        idx = indices[i]
+        pixel_bin = format(flat_img[idx], "08b")
+        data_binary += pixel_bin[-1]
+        
+        if len(data_binary) > 0 and len(data_binary) % 8 == 0:
+            total_bytes = [data_binary[j:j+8] for j in range(0, len(data_binary), 8)]
+            decoded_data = "".join([chr(int(b, 2)) for b in total_bytes])
+            if decoded_data.endswith("*^*^*"):
+                encrypted_msg = decoded_data[:-5]
+                return decrypt_text(password, encrypted_msg)
+                
+    return "No Hidden Data Found"
