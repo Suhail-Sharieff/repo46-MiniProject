@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganography Tools Web</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; background-color: #f4f4f4; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        .section { margin-bottom: 30px; border-top: 1px solid #ccc; padding-top: 20px; }
+        .btn { padding: 10px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        .btn:hover { background-color: #0056b3; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .result { padding: 10px; background-color: #e9ecef; border-radius: 4px; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Steganography Web App</h1>
+        <p>Hide secret messages inside Images, Text files, and Audio files.</p>
+        
+        <div class="section" id="encode-section">
+            <h2>Encode Message</h2>
+            <form id="encodeForm" enctype="multipart/form-data">
+                <label for="enc-type">Type of Cover File:</label>
+                <select id="enc-type" name="type" required>
+                    <option value="image">Image (.jpg, .png)</option>
+                    <option value="text">Text (.txt)</option>
+                    <option value="audio">Audio (.wav)</option>
+                </select>
+                
+                <label for="enc-file">Upload Cover File:</label>
+                <input type="file" id="enc-file" name="file" required>
+                
+                <label for="enc-text">Secret Message:</label>
+                <textarea id="enc-text" name="text" rows="4" placeholder="Enter the secret message here..." required></textarea>
+                
+                <button type="submit" class="btn">Encode & Download</button>
+            </form>
+            <div id="enc-status" class="result"></div>
+        </div>
+
+        <div class="section" id="decode-section">
+            <h2>Decode Message</h2>
+            <form id="decodeForm" enctype="multipart/form-data">
+                <label for="dec-type">Type of Stego File:</label>
+                <select id="dec-type" name="type" required>
+                    <option value="image">Image (.png)</option>
+                    <option value="text">Text (.txt)</option>
+                    <option value="audio">Audio (.wav)</option>
+                </select>
+                
+                <label for="dec-file">Upload Stego File:</label>
+                <input type="file" id="dec-file" name="file" required>
+                
+                <button type="submit" class="btn">Extract Secret Message</button>
+            </form>
+            <div id="dec-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+
+        document.getElementById('encodeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const statusDiv = document.getElementById('enc-status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerText = 'Encoding...';
+            
+            try {
+                const response = await fetch(`${API_URL}/encode`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'stego_file';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    statusDiv.innerText = 'File encoded and downloaded successfully!';
+                } else {
+                    const errorData = await response.json();
+                    statusDiv.innerText = 'Error: ' + errorData.error;
+                }
+            } catch (err) {
+                statusDiv.innerText = 'Error: ' + err.message;
+            }
+        });
+
+        document.getElementById('decodeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const resultDiv = document.getElementById('dec-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = 'Extracting...';
+            
+            try {
+                const response = await fetch(`${API_URL}/decode`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `<strong>Hidden Message:</strong> <br>${data.hidden_text}`;
+                } else {
+                    const errorData = await response.json();
+                    resultDiv.innerText = 'Error: ' + errorData.error;
+                }
+            } catch (err) {
+                resultDiv.innerText = 'Error: ' + err.message;
+            }
+        });
+    </script>
+</body>
+</html>
