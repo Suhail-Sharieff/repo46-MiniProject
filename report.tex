@@ -1,0 +1,380 @@
+\documentclass[12pt,a4paper]{report}
+
+% --- Packages (Merged from Synopsis and Report) ---
+\usepackage[a4paper, left=1.5in, right=1in, top=1in, bottom=1in]{geometry}
+\usepackage{times}          % Times New Roman font
+\usepackage{setspace}       % For line spacing
+\usepackage{fancyhdr}       % For headers and footers
+\usepackage{graphicx}       % For images
+\usepackage{titlesec}       % For custom formatting of titles
+\usepackage{tocloft}        % For Table of Contents formatting
+\usepackage{indentfirst}    % Indent first paragraph of sections
+\usepackage[hidelinks]{hyperref} % Clickable links, no red boxes
+\usepackage{float}          % To force image placement
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{caption}
+
+% --- Code listing style ---
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue},
+    stringstyle=\color{green!60!black},
+    commentstyle=\color{gray}\itshape,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    tabsize=4,
+    showstringspaces=false
+}
+
+% --- Line Spacing ---
+\onehalfspacing
+
+% --- Heading Styles ---
+% Chapter Title
+\titleformat{\chapter}{\centering\bfseries\fontsize{16pt}{18pt}\selectfont}{\thechapter}{1em}{}
+% Section Title
+\titleformat{\section}{\bfseries\fontsize{14pt}{16pt}\selectfont}{\thesection}{1em}{}
+% Subsection Title
+\titleformat{\subsection}{\bfseries\fontsize{12pt}{14pt}\selectfont}{\thesubsection}{1em}{}
+
+% --- Header and Footer Setup ---
+\pagestyle{fancy}
+\fancyhf{} % Clear all headers and footers
+
+% Remove Header Rule
+\renewcommand{\headrulewidth}{0pt}
+
+% Footer Configuration
+\fancyfoot[L]{Department of CSE, UVCE 2025}
+\fancyfoot[R]{Page $|$ \thepage}
+
+% Plain style (used for Chapter start pages)
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \fancyfoot[L]{Department of CSE, UVCE 2025}
+  \fancyfoot[R]{Page $|$ \thepage}
+}
+
+% --- TOC Formatting ---
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftsecfont}{\bfseries}
+
+% ================= DOCUMENT START =================
+\begin{document}
+
+% --- Title Page ---
+\begin{titlepage}
+    \centering
+    \vspace*{1.5cm}
+    {\fontsize{18pt}{22pt}\selectfont\textbf{A Multi-Modal Hybrid Steganography System with Cryptographic Fortification}}\\[1cm]
+    {\large Project Report }\\[0.5cm]
+    \textnormal{Submitted in partial fulfilment for the award of the degree of}\\[0.2cm]
+    {\large \textbf{Bachelor of Technology in Computer Science and Engineering}}\\[1cm]
+    \vspace{0.5cm}
+    
+    % Ensure you have uvce_logo.png in your compilation directory
+    \includegraphics[width=4cm]{uvce_logo.png}\\[1cm]
+    
+    {\large \textbf{University of Visvesvaraya College of Engineering}}\\
+    {\large (First State Autonomous University on IIT Model)}\\
+    K.R. Circle, Bangalore – 560001 [cite: 193]\\[1cm]
+    
+    \textbf{Submitted By:}\\
+    \vspace{0.2cm}
+    Suhail Sharieff [U25UV23T029106]\\[1cm]
+    
+    \textbf{Under the Guidance of:}\\
+    \vspace{0.2cm}
+    Dr. Tanuja R\\
+    Associate Professor, Department of CSE\\[1cm]
+    
+    \textbf{Academic Year: 2026–2027}\\
+\end{titlepage}
+
+% --- Abstract ---
+\begin{titlepage}
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+Digital steganography — the art and science of concealing information within seemingly innocuous carrier media — has emerged as a critical discipline at the intersection of information security, digital communications, and multimedia processing[cite: 2]. This project report presents a comprehensive multi-modal steganographic system capable of hiding secret textual payloads within four distinct carrier types: digital images (JPEG/PNG), plain text documents, uncompressed audio (WAV), and video files (MP4)[cite: 3]. The system is architected as a web-based application with a Flask REST API backend and a vanilla HTML/JavaScript frontend, enabling practical real-world deployment[cite: 4]. 
+
+For images, two embedding modes are offered: a baseline Least Significant Bit (LSB) sequential replacement algorithm and an advanced mode combining AES-256-CBC cryptographic pre-processing with PRNG-seeded pixel scattering to resist steganalytic attacks[cite: 5]. Text steganography leverages invisible Unicode Zero-Width Characters (ZWC) embedded between visible words, augmented by a custom XOR-shift transformation[cite: 6]. Audio steganography employs a two-bit indicator scheme to minimize detectable modification patterns in WAV frame data[cite: 7]. Video steganography targets individual frames, employing RC4 stream cipher encryption prior to LSB embedding[cite: 8]. System quality is empirically validated using Peak Signal-to-Noise Ratio (PSNR) and Structural Similarity Index Measure (SSIM), yielding values of PSNR $> 51$ dB and SSIM $> 0.9999$ for image steganography under normal payload conditions[cite: 9].
+
+\end{titlepage}
+% --- Table of Contents ---
+\tableofcontents
+\cleardoublepage
+
+% --- MAIN MATTER ---
+\pagenumbering{arabic}
+
+% --- CHAPTER 1: INTRODUCTION ---
+\chapter{Introduction}
+
+\section{Overview}
+Steganography is the art and science of hiding the fact that communication is taking place, by hiding information in other information[cite: 194]. While classical cryptography secures the content of a message by rendering it unreadable, it does nothing to conceal the existence of the communication itself[cite: 12]. An adversary observing encrypted traffic immediately knows that a protected message exists and may attempt to break the cipher or compel disclosure through extra-legal means[cite: 13]. This fundamental limitation of cryptography motivates the study of information hiding — specifically, steganography[cite: 14]. 
+
+Steganography derives from Greek roots meaning "covered writing." Its goal is imperceptibility: to conceal a secret payload within an innocent-looking cover medium, called the stego object, such that neither human observers nor automated detection programs (steganalysis tools) can determine that any message was hidden at all[cite: 15]. Modern digital steganography exploits the redundancy and noise tolerance inherent in multimedia files[cite: 17]. This project, \textbf{Steganography Tools}, implements a comprehensive suite of steganography techniques using a Python-based toolkit[cite: 196]. It allows a sender to hide secret text messages within four different types of digital media: Images, Text files, Audio files, and Video files[cite: 197]. 
+
+\section{Problem Statement}
+In an era where digital communication is ubiquitous, the security of sensitive information is paramount[cite: 201]. Existing steganographic tools often suffer from single-modality support, focusing on a single carrier type, and frequently lack cryptographic protection, meaning extracted payloads are immediately readable[cite: 23, 24]. Furthermore, sequential embedding vulnerabilities—where predictable bit placement creates detectable statistical signatures—are common, alongside a lack of quantitative quality validation and poor usability[cite: 25, 26]. 
+
+When data is transmitted over public or private networks, it faces several risks including data theft, unauthorized access, and information leakage[cite: 202, 203, 204]. This project addresses the need for covert communication where the very existence of the secret data must remain undetectable to the human eye or ear[cite: 206].
+
+\section{Objectives}
+The primary objectives of this project are:
+\begin{itemize}
+    \item To implement a unified platform for performing steganography on multiple media types: Image, Text, Audio, and Video[cite: 207].
+    \item To design and implement efficient encoding algorithms that embed secret messages without significantly distorting the cover media[cite: 208].
+    \item To ensure that the hidden data is retrievable only by the intended recipient using the correct decoding algorithms[cite: 209].
+    \item To implement specific advanced techniques such as Least Significant Bit (LSB) insertion for images and audio, Zero-Width Character (ZWC) embedding for text, and RC4 Encryption for video security[cite: 210].
+    \item To provide a user-friendly, menu-driven interface for easy encryption (encoding) and decryption (decoding)[cite: 211].
+\end{itemize}
+
+% --- CHAPTER 2: BACKGROUND AND LITERATURE REVIEW ---
+\chapter{Background and Literature Review}
+
+\section{Classical Steganography}
+The earliest documented modern digital steganography used Least Significant Bit substitution in grayscale images, proposed independently by several researchers in the 1990s[cite: 31]. The basic principle — replacing the LSB of pixel intensity values with secret data bits — achieves imperceptibility because the human visual system (HVS) has a detection threshold of approximately 1/64th of the maximum luminance value for typical viewing conditions[cite: 32].
+
+\section{Text Steganography Approaches}
+Text steganography has historically been limited by the lack of structural redundancy in ASCII text, unlike high-bit-depth images[cite: 33]. Three primary approaches originally existed: word-space modulation, line-shift coding, and feature modification[cite: 34, 35]. However, the rise of Unicode introduced a fourth category: Zero-Width Character (ZWC) steganography[cite: 36]. Characters such as the Zero Width Non-Joiner (U+200C) have no visible glyph representation but are stored as bytes in UTF-8 encoded files, making them ideal covert data carriers[cite: 37].
+
+\section{Audio Steganography Approaches}
+Audio information hiding exploits the psychoacoustic model of the human auditory system (HAS)[cite: 38]. Unlike images, audio uses time-domain samples where minor bit-level perturbations result in power changes far below the threshold of human audibility[cite: 39]. Common methods include LSB coding, phase coding, echo hiding, and spread spectrum[cite: 40, 41].
+
+\section{Video Steganography and Hybrid Systems}
+Video steganography extends image steganography to temporal sequences[cite: 42]. The additional temporal dimension provides both greater capacity and additional cover: an adversary must analyze each individual frame rather than a single still image[cite: 43]. Recent literature emphasizes hybrid approaches that combine steganography with cryptography[cite: 45]. Encryption ensures that even if the hidden payload is extracted, it remains unintelligible without the correct key[cite: 46]. PRNG-based pixel scattering destroys the statistical regularity introduced by naive sequential embedding, defeating chi-square and RS (Regular-Singular) analysis tools[cite: 47]. This work is directly inspired by and aligned with the findings of Al-Dmour and Al-Ani (2016) who surveyed the recent advances in Image Steganography[cite: 29].
+
+% --- CHAPTER 3: SYSTEM ARCHITECTURE ---
+\chapter{System Architecture}
+
+\section{High-Level Design}
+The proposed system follows a client-server architecture composed of four principal components:
+\begin{enumerate}
+    \item \textbf{Core Algorithm Library (\texttt{core.py}):} Command-line Python module implementing all steganographic algorithms with interactive user prompts[cite: 48].
+    \item \textbf{API Abstraction Layer (\texttt{api.py}):} Stateless Python module exposing function-level interfaces for all encode/decode operations, consumed by the web server[cite: 49].
+    \item \textbf{Web Server (\texttt{server.py}):} Flask-based REST API running on port 6868, handling HTTP requests, file I/O, and response formatting[cite: 50].
+    \item \textbf{Web Frontend (\texttt{frontend/index.html}):} Single-page vanilla HTML/CSS/JavaScript application served on port 3000, providing the user interface[cite: 51].
+\end{enumerate}
+
+\section{Technology Stack}
+The technology stack leverages Python 3.x for all backend computations and Flask 3.1.3 as the REST API framework[cite: 52]. Cross-origin resource sharing is handled by \texttt{flask-cors}, and API documentation is generated via Flasgger[cite: 52]. For multimedia processing, the system employs OpenCV 4.13 for image and video I/O, NumPy for array operations, and the standard library \texttt{wave} module for audio processing[cite: 52]. Cryptographic functions are powered by PyCryptodome 3.23, utilizing AES-256 encryption[cite: 52].
+
+\section{Data Flow}
+During encoding, a user selects the steganography modality and uploads a cover file via the web UI[cite: 53]. The frontend dispatches an HTTP POST to \texttt{/encode} via \texttt{multipart/form-data}, which Flask routes to the appropriate \texttt{api.py} algorithm[cite: 53, 54]. The resulting stego file is saved to an uploads directory, and the server returns either the file or a JSON payload containing quality metrics[cite: 55]. Conversely, during decoding, the user uploads the stego file and provides a password if advanced mode was utilized[cite: 56]. The file is routed to \texttt{/decode}, where the algorithm extracts the bit sequence, reverses the embedding process, and returns the recovered plaintext as a JSON response[cite: 57, 58].
+
+% --- CHAPTER 4: IMAGE STEGANOGRAPHY ---
+\chapter{Image Steganography Implementation}
+
+\section{Least Significant Bit (LSB) Technique}
+Digital images are made of pixels, each containing Red, Green, and Blue (RGB) values[cite: 215]. A standard 24-bit RGB image stores 8 bits of precision per color channel[cite: 19]. The LSB technique exploits the fact that the rightmost bit of an 8-bit integer contributes a maximum value difference of 1. Overwriting the LSB of these pixel values with secret message bits results in a color change imperceptible to the human eye[cite: 61, 217].
+
+The core LSB encoding algorithm operates by appending a terminator string \texttt{"*\^{}*\^{}*"} to the secret message, converting it to a binary sequence, and sequentially replacing the LSB of the R, G, and B channels[cite: 62, 63, 64]. 
+
+\begin{algorithm}
+\caption{Basic LSB Image Encoding}
+\label{alg:lsb_encode}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} Image $I$, Secret message $M$
+\STATE \textbf{Output:} Stego image $I'$
+\STATE $M' \leftarrow M + \texttt{"*\^{}*\^{}*"}$
+\STATE $B \leftarrow \texttt{msgtobinary}(M')$ 
+\STATE $k \leftarrow 0$ 
+\FOR{each row $r$ in $I$}
+    \FOR{each pixel $p = (R, G, B)$ in $r$}
+        \IF{$k < |B|$}
+            \STATE $R' \leftarrow \texttt{int}(R[0:7] + B[k], 2)$; $k \mathrel{+}= 1$
+        \ENDIF
+    \ENDFOR
+\ENDFOR
+\STATE $I' \leftarrow \texttt{cv2.imwrite}(I)$
+\end{algorithmic}
+\end{algorithm}
+
+\section{Advanced Mode: AES-256-CBC and PRNG Scattering}
+To defeat statistical steganalysis such as chi-square analysis—which detects the statistical signature of sequential LSB embedding by measuring the deviation between observed and expected pixel value pair frequencies—an advanced mode was developed[cite: 74].
+
+\subsection{Cryptographic Pre-Processing}
+Prior to embedding, the plaintext payload $P$ undergoes symmetric encryption using AES in Cipher Block Chaining (CBC) mode with a 256-bit key[cite: 69]. The key is derived from a user-provided password $K$:
+$$K_{256} = \text{SHA-256}(K)$$
+AES-256-CBC requires a random Initialization Vector (IV):
+$$C = \text{AES}_{K_{256}}^{\text{CBC}}(P, IV)$$
+This ensures that extracted payload bits appear as high-entropy ciphertext, indistinguishable from random noise without the key[cite: 71].
+
+\subsection{PRNG Pixel Scattering}
+Instead of sequential placement, the payload bits are scattered pseudo-randomly across the image array[cite: 72]. The system seeds a Pseudo-Random Number Generator (PRNG) with the user password:
+$$\text{indices} = \text{shuffle}\left([0, 1, \ldots, H \times W \times 3 - 1], \text{seed} = K\right)$$
+PRNG scattering distributes modifications uniformly across the entire image, preserving the natural pixel value distribution and thoroughly defeating statistical analysis[cite: 75].
+
+% --- CHAPTER 5: TEXT STEGANOGRAPHY ---
+\chapter{Text Steganography Implementation}
+
+\section{Zero-Width Character Embedding}
+Hiding text within text is achieved using Unicode Zero-Width Characters (ZWC)[cite: 218]. These are non-printing characters that do not display on the screen but exist in the file's binary data[cite: 219]. The algorithm maps the secret message bits to specific ZWCs and inserts them into the cover text, ensuring the cover text appears visually unchanged[cite: 220]. 
+
+The system maps two bits of information to one of four characters:
+\begin{itemize}
+    \item \texttt{00} $\rightarrow$ U+200C (Zero Width Non-Joiner) [cite: 83]
+    \item \texttt{01} $\rightarrow$ U+202C (Pop Directional Formatting) [cite: 83]
+    \item \texttt{10} $\rightarrow$ U+200E (Left-to-Right Mark) [cite: 83]
+    \item \texttt{11} $\rightarrow$ U+202D (Left-to-Right Override) [cite: 83]
+\end{itemize}
+
+\section{XOR-Shift Transformation}
+Before mapping to ZWC, the secret characters undergo a mathematical transformation. For ASCII characters ranging from 32 to 64 (symbols and digits), the algorithm applies an upward shift followed by an XOR operation with a constant value of 170 ($10101010_2$)[cite: 85, 88].
+\begin{align*}
+    t &= \text{ord}(\text{char}) \\
+    t_1 &= t + 48 \\
+    t_2 &= t_1 \oplus 170
+\end{align*}
+The 8-bit binary result is prefixed with a flag \texttt{0011}. For letters (ASCII 65+), a downward shift ($t - 48$) is applied, and the prefix \texttt{0110} is attached[cite: 86, 87]. A group of 6 ZWC characters is then used to carry these 12 bits[cite: 84].
+
+During decoding, the system scans the text file for ZWCs, extracts them, maps them back to binary, and reverses the mathematical XOR and arithmetic operations to retrieve the original text[cite: 247, 248].
+
+% --- CHAPTER 6: AUDIO STEGANOGRAPHY ---
+\chapter{Audio Steganography Implementation}
+
+\section{WAV Format and The Two-Bit Indicator Scheme}
+The system exclusively operates on the Waveform Audio File Format (WAV), which stores raw, uncompressed Pulse Code Modulation (PCM) audio samples[cite: 95, 96]. Any lossy compression step (like MP3) applied post-embedding would destroy the hidden data, hence WAV guarantees lossless storage[cite: 98].
+
+For audio files, the project uses a modified LSB algorithm[cite: 221]. It processes audio frames and employs a two-position scheme using bits at positions 0 (LSB) and 1 (second bit) of each frame byte[cite: 100].
+
+\begin{algorithm}
+\caption{Audio 2-Bit Indicator Encoding}
+\label{alg:audio}
+\begin{algorithmic}[1]
+\STATE $\text{res} \leftarrow \text{bin}(b, 8)$
+\IF{$\text{res}[4] = d$}
+    \STATE $b \leftarrow b$ \texttt{AND} $253$ \COMMENT{Clear bit 1 (indicator=0)}
+\ELSE
+    \STATE $b \leftarrow (b$ \texttt{AND} $253)$ \texttt{OR} $2$ \COMMENT{Set bit 1 (indicator=1)}
+    \STATE $b \leftarrow (b$ \texttt{AND} $254)$ \texttt{OR} $d$ \COMMENT{Write data to LSB}
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+
+If the 4th bit matches the secret bit, the 2nd LSB is set to 0. If it doesn't match, the 2nd LSB is set to 1, and the secret bit is forced into the 1st LSB[cite: 238, 239].
+
+\section{Acoustic Quality}
+The human auditory system has a dynamic range threshold of approximately 96 dB for 16-bit audio[cite: 102]. Modifying the two least significant bits introduces an theoretical Signal-to-Noise Ratio (SNR) of approximately 86.8 dB[cite: 103]. This is well above the hearing threshold, confirming the modifications are completely inaudible. The resulting stego file preserves all original audio parameters and is a perfectly playable WAV file[cite: 104].
+
+% --- CHAPTER 7: VIDEO STEGANOGRAPHY ---
+\chapter{Video Steganography Implementation}
+
+\section{Selective Frame Embedding}
+Video steganography combines Cryptography and Steganography by hiding data within a specific video frame selected by the user[cite: 224, 226]. The cover video is an MP4 file encoded with the XVID codec at 25 FPS[cite: 106]. Embedding in exactly one frame out of thousands provides plausible deniability; without knowing which frame contains data, an adversary must analyze all frames[cite: 108, 109]. 
+
+\section{RC4 Stream Cipher Encryption}
+The secret text is first encrypted using the RC4 Stream Cipher, a variable-length key algorithm[cite: 225]. The RC4 algorithm utilizes a Key Scheduling Algorithm (KSA) to produce a key-dependent permutation, followed by a Pseudo-Random Generation Algorithm (PRGA) to generate a keystream[cite: 112, 113]. 
+
+$$C_i = P_i \oplus K_{\text{stream},i}$$
+
+Because RC4 is a symmetric stream cipher, the XOR operation is its own inverse, allowing for straightforward extraction and decryption provided the correct key is supplied[cite: 115, 255]. While RC4 has known cryptographic weaknesses, it provides an adequate layer of obfuscation for the video module's scope[cite: 116, 117].
+
+A known implementation limitation in the current codebase is an indentation bug in the \texttt{embed()} function, where a premature \texttt{return} limits effective embedding capacity to $W \times 3$ bits (e.g., 240 characters for a 640-wide video)[cite: 122, 124].
+
+% --- CHAPTER 8: WEB APPLICATION INTERFACE ---
+\chapter{Web Application Interface}
+
+\section{Flask Backend and API Endpoints}
+The web server is implemented using Flask, a lightweight Python web framework[cite: 126]. It serves a dual role: managing file I/O operations and directing multi-modal processing requests to the underlying algorithmic abstraction layer (\texttt{api.py})[cite: 49]. 
+
+Two primary RESTful endpoints are exposed:
+\begin{itemize}
+    \item \texttt{POST /encode}: Accepts a cover file, textual payload, and optional cryptographic password via \texttt{multipart/form-data}. Depending on parameters, it triggers either basic sequential encoding or the advanced AES+PRNG methodology, returning the generated stego file or a JSON payload containing quality metrics[cite: 127, 128].
+    \item \texttt{POST /decode}: Accepts a stego file and password, routing to the decryption protocols and returning the recovered plaintext as JSON[cite: 129].
+\end{itemize}
+
+\section{CORS and API Documentation}
+To facilitate communication between the vanilla HTML frontend operating on a separate origin (port 3000) and the Flask backend (port 6868), Cross-Origin Resource Sharing (CORS) is enabled[cite: 131]. Additionally, Swagger UI documentation is auto-generated using Flasgger, allowing developers to interactively test endpoints[cite: 130].
+
+% --- CHAPTER 9: EXPERIMENTAL RESULTS AND EVALUATION ---
+\chapter{Experimental Results and Evaluation}
+
+\section{Quality Metrics Validation}
+To quantitatively validate imperceptibility, Peak Signal-to-Noise Ratio (PSNR) and Structural Similarity Index Measure (SSIM) were calculated for the image steganography module[cite: 150].
+
+$$ \text{PSNR} = 10 \cdot \log_{10}\left(\frac{255^2}{\text{MSE}}\right) \quad \text{(dB)} $$
+
+Assuming uniformly distributed random payload bits embedded in 1 LSB per channel, the Mean Squared Error (MSE) equates to approximately 0.25, yielding a theoretical PSNR of around 54.1 dB[cite: 150]. Experimental results confirm that payload injection consistently yields a PSNR $\approx 54.1$ dB and SSIM $> 0.9999$ across both basic LSB and advanced AES+PRNG modes, vastly exceeding the accepted imperceptibility threshold of 30 dB[cite: 151, 152].
+
+\section{Capacity Analysis}
+\begin{itemize}
+    \item \textbf{Text:} The ZWC approach capacity is intrinsically tied to the cover text's word count. For a sample 6,700-word document, maximum payload capacity is 1,116 characters[cite: 154].
+    \item \textbf{Audio:} An uncompressed 2.6 MB WAV file can successfully conceal approximately 330 KB of textual payload, demonstrating that audio steganography provides substantially greater capacity than text approaches[cite: 155].
+\end{itemize}
+
+\section{Security Posture}
+The threat model considers passive observers, automated steganalysts utilizing chi-square/RS analysis tools, and active adversaries attempting decryption[cite: 133, 134, 135]. While basic LSB embedding is vulnerable to payload exposure and statistical anomaly detection, the Advanced Image Mode (utilizing PRNG scattering and AES-256) exhibits total resistance against chi-square testing and brute-force key attacks[cite: 136, 140, 142]. 
+
+% --- CHAPTER 10: CONCLUSION AND FUTURE WORK ---
+\chapter{Conclusion and Future Work}
+
+\section{Conclusion}
+This project successfully developed a secure, efficient, and versatile method for protecting sensitive information using a multi-modal hybrid steganographic system[cite: 256]. The implementation demonstrates the core principles of modern digital steganography: high imperceptibility (validated by PSNR $> 54$ dB and SSIM $> 0.9999$), strong cryptographic security via AES-256-CBC and RC4 encryption, and robust steganalysis resistance through PRNG-seeded pixel scattering[cite: 170, 171, 172]. The use of robust techniques like ZWC for text and a modified 2-bit indicator for audio demonstrates the practical implementation of advanced security concepts[cite: 259].
+
+\section{Limitations and Future Scope}
+Current limitations include vulnerability to lossy compression (such as JPEG resampling or XVID video re-encoding), which can inadvertently destroy embedded LSB data[cite: 158, 159]. Additionally, the API currently lacks authentication mechanisms, and the ZWC text methodology faces inherent capacity constraints based on document length[cite: 161, 162].
+
+Future iterations of the system should focus on implementing Discrete Cosine Transform (DCT) domain steganography to provide inherent resistance against JPEG compression artifacts[cite: 165]. Furthermore, extending the PRNG cryptographic scattering methodology to the audio and text modules would significantly harden the entire ecosystem against automated steganalysis[cite: 163].
+
+% --- BIBLIOGRAPHY ---
+\cleardoublepage
+\addcontentsline{toc}{chapter}{Bibliography}
+\begin{thebibliography}{00}
+
+\bibitem{ieee9335027} 
+A. Islam, C. Long, A. Basharat, and A. Hoogs, 
+``A Review of the Recent Advances in Image Steganography,'' 
+\textit{IEEE Access}, 2021. Document ID: 9335027[cite: 178].
+
+\bibitem{python_docs}
+Python3 Documentation. (2026).
+Retrieved from \url{https://www.python.org/doc/}[cite: 262].
+
+\bibitem{chi_square}
+A. Westfeld and A. Pfitzmann,
+``Attacks on Steganographic Systems,''
+\textit{Proc. 3rd International Workshop on Information Hiding},
+Springer, 2000, pp. 61–76[cite: 179].
+
+\bibitem{rs_analysis}
+J. Fridrich, M. Goljan, and R. Du,
+``Detecting LSB Steganography in Color and Grayscale Images,''
+\textit{IEEE MultiMedia}, vol. 8, no. 4, pp. 22–28, 2001[cite: 180].
+
+\bibitem{aes_nist}
+National Institute of Standards and Technology (NIST),
+``Advanced Encryption Standard (AES),''
+\textit{FIPS Publication 197}, 2001[cite: 181].
+
+\bibitem{ssim}
+Z. Wang, A. C. Bovik, H. R. Sheikh, and E. P. Simoncelli,
+``Image Quality Assessment: From Error Visibility to Structural Similarity,''
+\textit{IEEE Transactions on Image Processing},
+vol. 13, no. 4, pp. 600–612, 2004[cite: 182].
+
+\bibitem{audio_steg}
+W. Bender, D. Gruhl, N. Morimoto, and A. Lu,
+``Techniques for Data Hiding,''
+\textit{IBM Systems Journal}, vol. 35, nos. 3\&4, pp. 313–336, 1996[cite: 183].
+
+\bibitem{unicode_steg}
+R. Ahvan and H. Z. Pour,
+``Two New Methods of Text Steganography using Unicode Characters,''
+\textit{International Journal of Computer Applications}, 2016[cite: 186].
+
+\end{thebibliography}
+
+\end{document}

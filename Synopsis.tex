@@ -1,0 +1,233 @@
+\documentclass[12pt,a4paper]{report}
+
+% --- Packages ---
+\usepackage[a4paper, left=1.5in, right=1in, top=1in, bottom=1in]{geometry}
+\usepackage{times}          % Times New Roman font
+\usepackage{setspace}       % For line spacing
+\usepackage{fancyhdr}       % For headers and footers
+\usepackage{graphicx}       % For images
+\usepackage{titlesec}       % For custom formatting of titles
+\usepackage{tocloft}        % For Table of Contents formatting
+\usepackage{indentfirst}    % Indent first paragraph of sections
+\usepackage[hidelinks]{hyperref} % Clickable links, no red boxes
+\usepackage{float}          % To force image placement
+
+% --- Line Spacing ---
+\onehalfspacing
+
+% --- Heading Styles ---
+% Chapter Title
+\titleformat{\chapter}{\centering\bfseries\fontsize{16pt}{18pt}\selectfont}{\thechapter}{1em}{}
+% Section Title
+\titleformat{\section}{\bfseries\fontsize{14pt}{16pt}\selectfont}{\thesection}{1em}{}
+% Subsection Title
+\titleformat{\subsection}{\bfseries\fontsize{12pt}{14pt}\selectfont}{\thesubsection}{1em}{}
+
+% --- Header and Footer Setup ---
+\pagestyle{fancy}
+\fancyhf{} % Clear all headers and footers
+
+% Remove Header Rule
+\renewcommand{\headrulewidth}{0pt}
+
+% Footer Configuration
+\fancyfoot[L]{Department of CSE, UVCE 2025}
+\fancyfoot[R]{Page $|$ \thepage} % Format: Page | Number
+
+% Plain style (used for Chapter start pages)
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \fancyfoot[L]{Department of CSE, UVCE 2025}
+  \fancyfoot[R]{Page $|$ \thepage}
+}
+
+% --- TOC Formatting ---
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftsecfont}{\bfseries}
+
+% ================= DOCUMENT START =================
+\begin{document}
+
+% --- Title Page ---
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\fontsize{18pt}{22pt}\selectfont\textbf{Steganography Tools for Secure Data Hiding}}\\[1cm]
+    {\large Mini Project Synopsis }\\[0.5cm]
+    \textnormal{Submitted in partial fulfilment for the award of the degree of}\\[0.2cm]
+    {\large \textbf{Bachelor of Technology in Computer Science and Engineering}}\\[1cm]
+    \vspace{1cm}
+    
+    % Logo
+    \includegraphics[width=4cm]{uvce_logo.png}\\[1cm]
+    
+    {\large \textbf{University of Visvesvaraya College of Engineering}}\\
+    {\large (First State Autonomous University on IIT Model)}\\
+    K.R. Circle, Bangalore – 560001\\[1cm]
+    
+    \textbf{Submitted By:}\\
+    \vspace{0.2cm}
+    Suhail Sharieff [U25UV23T029106]\\[1cm]
+    
+    \textbf{Under the Guidance of:}\\
+    \vspace{0.2cm}
+    Dr. Tanuja R\\
+    Associate Professor, Department of CSE\\[1cm]
+    
+    \textbf{Academic Year: 2026–2027}\\
+\end{titlepage}
+
+% --- Table of Contents ---
+\tableofcontents
+\cleardoublepage
+
+% --- MAIN MATTER ---
+\pagenumbering{arabic}
+
+% --- CHAPTER 1: INTRODUCTION ---
+\chapter{Introduction}
+Steganography is the art and science of hiding the fact that communication is taking place, by hiding information in other information. Unlike cryptography, which scrambles a message so it cannot be understood, steganography hides the message so it cannot be seen. 
+
+This project, \textbf{Steganography Tools}, implements a comprehensive suite of steganography techniques using a Python-based toolkit. It allows a sender to hide secret text messages within four different types of digital media: \textbf{Images, Text files, Audio files, and Video files}. The system ensures that the "stego-file" (the file containing the hidden message) retains the same format and perceptual quality as the original cover file. The receiver, possessing the appropriate decoding tool, can retrieve the secret text from the stego-file. This project serves as a demonstration of efficient algorithms for covert communication across multiple media formats.
+
+% --- CHAPTER 2: PROBLEM STATEMENT ---
+\chapter{Problem Statement}
+In an era where digital communication is ubiquitous, the security of sensitive information is paramount. When data is transmitted over public or private networks, it faces several risks:
+\begin{itemize}
+    \item \textbf{Data Theft:} Interception of sensitive data by malicious actors.
+    \item \textbf{Unauthorized Access:} Access to confidential communications by unintended recipients.
+    \item \textbf{Information Leakage:} The mere presence of encrypted data can signal to an attacker that sensitive communication is occurring, making it a target.
+\end{itemize}
+
+While standard cryptography protects the \textit{content} of a message, it does not hide the \textit{existence} of the message. This project addresses the need for covert communication where the very existence of the secret data must remain undetectable to the human eye or ear.
+
+% --- CHAPTER 3: OBJECTIVE ---
+\chapter{Objective}
+The main objectives of this project are:
+\begin{itemize}
+    \item To implement a unified platform for performing steganography on multiple media types: Image, Text, Audio, and Video.
+    \item To design and implement efficient encoding algorithms that embed secret messages without significantly distorting the cover media.
+    \item To ensure that the hidden data is retrievable only by the intended recipient using the correct decoding algorithms.
+    \item To implement specific advanced techniques such as \textit{Least Significant Bit (LSB)} insertion for images and audio, \textit{Zero-Width Character (ZWC)} embedding for text, and \textit{RC4 Encryption} for video security.
+    \item To provide a user-friendly, menu-driven interface for easy encryption (encoding) and decryption (decoding).
+    \item To demonstrate the practical application of steganography for use cases such as intelligence operations, secure military communication, and private data transfer.
+\end{itemize}
+
+% --- CHAPTER 4: CONCEPT OF STEGANOGRAPHY IMPLEMENTED ---
+\chapter{Concept of Steganography Implemented}
+The project relies on the principle of modifying the non-essential or redundant bits of a digital file to store secret data. The implemented techniques vary by media type:
+
+\section{Image Steganography (LSB Insertion)}
+This module uses the \textbf{Least Significant Bit (LSB) Insertion} technique. Digital images are made of pixels, each containing Red, Green, and Blue (RGB) values. The algorithm overwrites the LSB of these pixel values with the bits of the secret message. Since the LSB has the least effect on the color value, the change is imperceptible to the human eye.
+
+\section{Text Steganography (Zero-Width Characters)}
+Hiding text within text is achieved using Unicode \textbf{Zero-Width Characters (ZWC)}. These are non-printing characters that do not display on the screen but exist in the file's binary data. The algorithm maps the secret message bits to specific ZWCs and inserts them into the cover text. This ensures the cover text appears visually unchanged.
+
+\section{Audio Steganography (Modified LSB)}
+For audio files (.wav), the project uses a modified LSB algorithm. It processes audio frames and checks the 4th LSB against the secret message bit. Based on the comparison, it modifies the 2nd LSB or the LSB (1st bit) to encode the data. This selective modification helps in retaining audio quality while embedding data.
+
+\section{Video Steganography (Hybrid Crypto-Steganography)}
+Video steganography combines \textbf{Cryptography} and \textbf{Steganography}. 
+\begin{enumerate}
+    \item \textbf{Encryption:} The secret text is first encrypted using the \textbf{RC4 Stream Cipher}, a variable-length key algorithm. This produces a cipher-text.
+    \item \textbf{Embedding:} The cipher-text is then embedded into the LSBs of the pixels of a specific video frame selected by the user. 
+\end{enumerate}
+This double-layer approach ensures that even if the data is extracted, it remains unreadable without the decryption key.
+
+% --- CHAPTER 5: WORKING ---
+\chapter{Working}
+
+\section{Encoding (Encryption/Hiding) Process}
+The system operates via a main menu where the user selects the media type.
+
+\textbf{1. Image Encoding:}
+\begin{itemize}
+    \item User uploads a cover image and enters the secret text.
+    \item A delimiter (\texttt{*$^\wedge$*$^\wedge$*}) is appended to the text to mark the end.
+    \item The text is converted to binary.
+    \item The system iterates through the image pixels, replacing the LSB of the Red, then Green, then Blue channels sequentially with the message bits.
+    \item The resulting image is saved as a \texttt{.png} to prevent lossy compression.
+\end{itemize}
+
+\textbf{2. Text Encoding:}
+\begin{itemize}
+    \item User inputs cover text and secret message.
+    \item The ASCII values of the secret message are manipulated (incremented/decremented and XORed with 170) and converted to 12-bit binary strings.
+    \item Every 2 bits are mapped to a specific Zero-Width Character (e.g., \texttt{00} $\rightarrow$ \texttt{0x200C}).
+    \item These invisible characters are inserted after words in the cover text file.
+\end{itemize}
+
+\textbf{3. Audio Encoding:}
+\begin{itemize}
+    \item User selects a \texttt{.wav} file.
+    \item The system reads the audio frames. For every byte, it checks if the 4th LSB matches the secret bit.
+    \item If it matches, the 2nd LSB is set to 0. If it doesn't match, the 2nd LSB is set to 1, and the secret bit is stored in the 1st LSB.
+    \item This logic allows the decoder to know exactly where the data was stored.
+\end{itemize}
+
+\textbf{4. Video Encoding:}
+\begin{itemize}
+    \item User provides a video file, secret text, and a secure key.
+    \item The text is encrypted using RC4 (Key-Scheduling Algorithm and Pseudo-Random Generation Algorithm).
+    \item The user selects a specific frame number.
+    \item The encrypted text bits overwrite the LSBs of the pixels in that specific frame.
+\end{itemize}
+
+\section{Decoding (Decryption/Extraction) Process}
+The receiver uses the tool to extract the message from the stego-file.
+
+\textbf{1. Image Decoding:}
+\begin{itemize}
+    \item The system reads the LSBs of the stego-image pixels.
+    \item Bits are reassembled into characters.
+    \item The process stops when the delimiter (\texttt{*$^\wedge$*$^\wedge$*}) is detected, and the message is displayed.
+\end{itemize}
+
+\textbf{2. Text Decoding:}
+\begin{itemize}
+    \item The system scans the text file for Zero-Width Characters.
+    \item It extracts the ZWCs, maps them back to binary bits, and reverses the mathematical operations (XOR, subtraction/addition) to retrieve the original text.
+\end{itemize}
+
+\textbf{3. Audio Decoding:}
+\begin{itemize}
+    \item The system reads the audio frames.
+    \item It checks the 2nd LSB of each byte. 
+    \item If the 2nd LSB is 0, it retrieves the 4th LSB (which was the matching original bit).
+    \item If the 2nd LSB is 1, it retrieves the 1st LSB (where the bit was forced).
+    \item The binary string is converted back to text.
+\end{itemize}
+
+\textbf{4. Video Decoding:}
+\begin{itemize}
+    \item User inputs the stego-video and the secret key.
+    \item The system extracts the LSB data from the specific frame.
+    \item The extracted data (ciphertext) is passed through the RC4 decryption algorithm using the provided key.
+    \item The original plaintext is revealed.
+\end{itemize}
+
+% --- CONCLUSION ---
+\chapter*{Conclusion}
+\addcontentsline{toc}{chapter}{Conclusion}
+This project provides a secure, efficient, and versatile method for protecting sensitive information using Steganography. By implementing algorithms for Image, Text, Audio, and Video, it offers comprehensive coverage for various communication needs. 
+
+The tool ensures strong confidentiality by not only hiding the meaning of the message (via encryption in the video module) but primarily by hiding the very existence of the message within innocent-looking files. The use of robust techniques like ZWC for text and modified LSB for audio demonstrates the practical implementation of advanced security concepts. This project has potential real-world applications for intelligence agencies (such as RAW or the Army) and special emergency operations where covert data transfer is critical.
+
+\cleardoublepage
+
+
+
+% --- BIBLIOGRAPHY ---
+\chapter*{Bibliography}
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\begin{itemize}
+   
+    \item [[ 1]]  IEEE Research Paper. (2021). Retrieved from https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9335027
+    \item [[ 2]]  Python3 Documentation. (2026). Retrieved from https://www.python.org/doc/
+    \item [[ 3]]  IRJET Paper (2023). Retrieved from https://www.irjet.net/archives/V10/i2/IRJET-V10I224.pdf
+\end{itemize}
+
+
+\end{document}
