@@ -262,3 +262,114 @@ def decode_img_advanced(img, password):
                 return decrypt_text(password, encrypted_msg)
                 
     return "No Hidden Data Found"
+
+# Video Steganography
+def KSA(key):
+    key_length = len(key)
+    S=list(range(256)) 
+    j=0
+    for i in range(256):
+        j=(j+S[i]+key[i % key_length]) % 256
+        S[i],S[j]=S[j],S[i]
+    return S
+
+def PRGA(S,n):
+    i=0; j=0; key=[]
+    while n>0:
+        n=n-1
+        i=(i+1)%256
+        j=(j+S[i])%256
+        S[i],S[j]=S[j],S[i]
+        K=S[(S[i]+S[j])%256]
+        key.append(K)
+    return key
+
+def rc4_encrypt_decrypt(text, key_str):
+    if not key_str: key_str = "default_key"
+    key = [ord(c) for c in key_str]
+    S = KSA(key)
+    keystream = np.array(PRGA(S, len(text)))
+    text_arr = np.array([ord(i) for i in text])
+    cipher = keystream ^ text_arr
+    return ''.join([chr(c) for c in cipher])
+
+def embed_vid_frame(frame, data, password):
+    data = rc4_encrypt_decrypt(data, password)
+    if (len(data) == 0): 
+        raise ValueError('Data entered to be encoded is empty')
+    data +='*^*^*'
+    binary_data=msgtobinary(data)
+    length_data = len(binary_data)
+    index_data = 0
+    for i in frame:
+        for pixel in i:
+            r, g, b = msgtobinary(pixel)
+            if index_data < length_data:
+                pixel[0] = int(r[:-1] + binary_data[index_data], 2) 
+                index_data += 1
+            if index_data < length_data:
+                pixel[1] = int(g[:-1] + binary_data[index_data], 2) 
+                index_data += 1
+            if index_data < length_data:
+                pixel[2] = int(b[:-1] + binary_data[index_data], 2) 
+                index_data += 1
+            if index_data >= length_data:
+                break
+        if index_data >= length_data:
+            break
+    return frame
+
+def extract_vid_frame(frame, password):
+    flat_frame = frame.flatten()
+    data_binary = ""
+    decoded_data = ""
+    for val in flat_frame:
+        data_binary += format(val, "08b")[-1]
+        if len(data_binary) > 0 and len(data_binary) % 8 == 0:
+            byte = data_binary[-8:]
+            try:
+                decoded_data += chr(int(byte, 2))
+            except:
+                pass
+            if decoded_data.endswith("*^*^*"):
+                encrypted_msg = decoded_data[:-5]
+                return rc4_encrypt_decrypt(encrypted_msg, password)
+    return "No Hidden Data Found"
+
+def encode_vid_data(in_file, data, out_file, password=""):
+    cap = cv2.VideoCapture(in_file)
+    fourcc = cv2.VideoWriter_fourcc(*'FFV1')
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    if fps == 0: fps = 25.0
+    size = (frame_width, frame_height)
+    out = cv2.VideoWriter(out_file, fourcc, fps, size)
+    
+    frame_number = 0
+    while(cap.isOpened()):
+        ret, frame = cap.read()
+        if ret == False:
+            break
+        frame_number += 1
+        if frame_number == 1:    
+            frame = embed_vid_frame(frame, data, password)
+        out.write(frame)
+    cap.release()
+    out.release()
+    return out_file
+
+def decode_vid_data(in_file, password=""):
+    cap = cv2.VideoCapture(in_file)
+    frame_number = 0
+    while(cap.isOpened()):
+        ret, frame = cap.read()
+        if ret == False:
+            break
+        frame_number += 1
+        if frame_number == 1:
+            res = extract_vid_frame(frame, password)
+            cap.release()
+            return res
+    cap.release()
+    return "No Hidden Data Found"

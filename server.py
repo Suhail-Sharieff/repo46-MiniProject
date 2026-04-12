@@ -32,7 +32,7 @@ def uploaded_file(filename):
             'in': 'formData',
             'type': 'string',
             'required': True,
-            'description': 'Type of cover file (image, text, audio)'
+            'description': 'Type of cover file (image, text, audio, video)'
         },
         {
             'name': 'text',
@@ -97,6 +97,10 @@ def encode():
         elif stego_type == 'audio':
             api.encode_aud_data(in_path, secret_text, out_path)
             return send_file(out_path, as_attachment=True)
+        elif stego_type == 'video':
+            out_path = os.path.splitext(out_path)[0] + '.avi'
+            api.encode_vid_data(in_path, secret_text, out_path, password)
+            return send_file(out_path, as_attachment=True)
         else:
             return jsonify({'error': 'Invalid stego type'}), 400
     except Exception as e:
@@ -119,7 +123,7 @@ def encode():
             'in': 'formData',
             'type': 'string',
             'required': True,
-            'description': 'Type of stego file (image, text, audio)'
+            'description': 'Type of stego file (image, text, audio, video)'
         },
         {
             'name': 'password',
@@ -159,6 +163,8 @@ def decode():
             decoded = api.decode_txt_data(in_path)
         elif stego_type == 'audio':
             decoded = api.decode_aud_data(in_path)
+        elif stego_type == 'video':
+            decoded = api.decode_vid_data(in_path, password)
         else:
             return jsonify({'error': 'Invalid stego type'}), 400
             
