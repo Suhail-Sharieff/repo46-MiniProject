@@ -43,15 +43,15 @@ def encode_img_data(img, data, nameoffile):
 
 def decode_img_data(img):
     data_binary = ""
+    decoded_data = ""
     for i in img:
         for pixel in i:
             r, g, b = msgtobinary(pixel) 
-            data_binary += r[-1]  
-            data_binary += g[-1]  
-            data_binary += b[-1]  
-            total_bytes = [ data_binary[i: i+8] for i in range(0, len(data_binary), 8) ]
-            decoded_data = ""
-            for byte in total_bytes:
+            data_binary += r[-1] + g[-1] + b[-1]
+            
+            while len(data_binary) >= 8:
+                byte = data_binary[:8]
+                data_binary = data_binary[8:]
                 decoded_data += chr(int(byte, 2))
                 if decoded_data[-5:] == "*^*^*": 
                     return decoded_data[:-5]
@@ -165,19 +165,20 @@ def decode_aud_data(in_file):
     frames=song.readframes(nframes)
     frame_bytes=bytearray(list(frames))
     extracted = ""
+    decoded_data = ""
     for i in range(len(frame_bytes)):
         res = bin(frame_bytes[i])[2:].zfill(8)
         if res[len(res)-2]=='0':
             extracted+=res[len(res)-4]
         else:
             extracted+=res[len(res)-1]
-        all_bytes = [ extracted[k: k+8] for k in range(0, len(extracted), 8) ]
-        decoded_data = ""
-        for byte in all_bytes:
-            if len(byte)==8:
-                decoded_data += chr(int(byte, 2))
-                if decoded_data[-5:] == "*^*^*":
-                    return decoded_data[:-5]
+        
+        while len(extracted) >= 8:
+            byte = extracted[:8]
+            extracted = extracted[8:]
+            decoded_data += chr(int(byte, 2))
+            if decoded_data[-5:] == "*^*^*":
+                return decoded_data[:-5]
     return "No Hidden Data Found"
 
 
@@ -249,14 +250,15 @@ def decode_img_advanced(img, password):
     random.shuffle(indices)
     
     data_binary = ""
+    decoded_data = ""
     for i in range(len(indices)):
         idx = indices[i]
         pixel_bin = format(flat_img[idx], "08b")
         data_binary += pixel_bin[-1]
         
-        if len(data_binary) > 0 and len(data_binary) % 8 == 0:
-            total_bytes = [data_binary[j:j+8] for j in range(0, len(data_binary), 8)]
-            decoded_data = "".join([chr(int(b, 2)) for b in total_bytes])
+        if len(data_binary) == 8:
+            decoded_data += chr(int(data_binary, 2))
+            data_binary = ""
             if decoded_data.endswith("*^*^*"):
                 encrypted_msg = decoded_data[:-5]
                 return decrypt_text(password, encrypted_msg)
@@ -325,12 +327,12 @@ def extract_vid_frame(frame, password):
     decoded_data = ""
     for val in flat_frame:
         data_binary += format(val, "08b")[-1]
-        if len(data_binary) > 0 and len(data_binary) % 8 == 0:
-            byte = data_binary[-8:]
+        if len(data_binary) == 8:
             try:
-                decoded_data += chr(int(byte, 2))
+                decoded_data += chr(int(data_binary, 2))
             except:
                 pass
+            data_binary = ""
             if decoded_data.endswith("*^*^*"):
                 encrypted_msg = decoded_data[:-5]
                 return rc4_encrypt_decrypt(encrypted_msg, password)

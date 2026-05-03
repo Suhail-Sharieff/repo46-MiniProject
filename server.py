@@ -75,13 +75,15 @@ def encode():
     try:
         if stego_type == 'image':
             img = cv2.imread(in_path)
+            out_path = os.path.splitext(out_path)[0] + '.png'
+            out_filename = os.path.basename(out_path)
             if password:
                 # Advanced Mode
                 stego_img = api.encode_img_advanced(img, secret_text, password, out_path)
                 psnr, ssim_val = api.calculate_metrics(img, stego_img)
                 return jsonify({
                     'message': 'Encoding successful',
-                    'file_url': f'/uploads/stego_{filename}',
+                    'file_url': f'/uploads/{out_filename}',
                     'metrics': {
                         'psnr': round(psnr, 2),
                         'ssim': round(ssim_val, 4)

@@ -234,15 +234,15 @@ def encode_img_data(img):
 
 def decode_img_data(img):
     data_binary = ""
+    decoded_data = ""
     for i in img:
         for pixel in i:
             r, g, b = msgtobinary(pixel) 
-            data_binary += r[-1]  
-            data_binary += g[-1]  
-            data_binary += b[-1]  
-            total_bytes = [ data_binary[i: i+8] for i in range(0, len(data_binary), 8) ]
-            decoded_data = ""
-            for byte in total_bytes:
+            data_binary += r[-1] + g[-1] + b[-1]
+            
+            while len(data_binary) >= 8:
+                byte = data_binary[:8]
+                data_binary = data_binary[8:]
                 decoded_data += chr(int(byte, 2))
                 if decoded_data[-5:] == "*^*^*": 
                     print("\n\nThe Encoded data which was hidden in the Image was :--  ",decoded_data[:-5])
@@ -335,19 +335,20 @@ def decode_aud_data():
     frame_bytes=bytearray(frame_list)
 
     extracted = ""
+    decoded_data = ""
     p=0
     for i in range(len(frame_bytes)):
         if(p==1):
             break
         res = bin(frame_bytes[i])[2:].zfill(8)
-        if res[len(res)-2]==0:
+        if res[len(res)-2]=='0':
             extracted+=res[len(res)-4]
         else:
             extracted+=res[len(res)-1]
     
-        all_bytes = [ extracted[i: i+8] for i in range(0, len(extracted), 8) ]
-        decoded_data = ""
-        for byte in all_bytes:
+        while len(extracted) >= 8:
+            byte = extracted[:8]
+            extracted = extracted[8:]
             decoded_data += chr(int(byte, 2))
             if decoded_data[-5:] == "*^*^*":
                 print("The Encoded data was :--",decoded_data[:-5])
@@ -492,16 +493,16 @@ def embed(frame):
 
 def extract(frame):
     data_binary = ""
+    decoded_data = ""
     final_decoded_msg = ""
     for i in frame:
         for pixel in i:
             r, g, b = msgtobinary(pixel) 
-            data_binary += r[-1]  
-            data_binary += g[-1]  
-            data_binary += b[-1]  
-            total_bytes = [ data_binary[i: i+8] for i in range(0, len(data_binary), 8) ]
-            decoded_data = ""
-            for byte in total_bytes:
+            data_binary += r[-1] + g[-1] + b[-1]
+            
+            while len(data_binary) >= 8:
+                byte = data_binary[:8]
+                data_binary = data_binary[8:]
                 decoded_data += chr(int(byte, 2))
                 if decoded_data[-5:] == "*^*^*": 
                     for i in range(0,len(decoded_data)-5):
